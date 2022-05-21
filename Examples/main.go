@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	//"os"
 )
 
@@ -26,14 +27,37 @@ func showVersion() {
 }
 func main() {
 	//Main entry
-	fmt.Println("Test text")
+	log.SetLevel(log.TraceLevel) // 在测试环境中设置低等级级别，记录trace及以上级别
+	//log.SetLevel(log.InfoLevel)    // 在生产环境中需要考虑性能，关注关键信息，level 设置高一点
+	//log.SetReportCaller(true)            // 调用者文件名与位置
+	//log.SetFormatter(new(log.JSONFormatter))    // 日志格式设置成json
+
 	flag.Parse()
+	var typ, event, arg string
 	if isHelp {
 		flag.Usage()
+		typ, event = "argparse", "Check help"
+
+		log.WithFields(log.Fields{
+			"type": typ,
+			"key":  nil,
+		}).Info(event)
+		return
 	}
 	if isVersion {
 		showVersion()
+		typ, event = "argparse", "Check version"
+		log.WithFields(log.Fields{
+			"type": typ,
+			"key":  nil,
+		}).Info(event)
+		return
 	}
 	fmt.Println(filename)
+	typ, event, arg = "argparse", "Input Filename", filename
+	log.WithFields(log.Fields{
+		"type": typ,
+		"arg":  arg,
+	}).Trace(event)
 	//TODO:Log module
 }
