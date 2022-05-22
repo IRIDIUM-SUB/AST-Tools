@@ -4,6 +4,10 @@ import (
 	"flag"
 	"fmt"
 	log "github.com/sirupsen/logrus"
+	"io/ioutil"
+	"os"
+	"strings"
+	//"path/filepath"
 	//"os"
 )
 
@@ -40,8 +44,8 @@ func main() {
 
 		log.WithFields(log.Fields{
 			"type": typ,
-			"key":  nil,
-		}).Info(event)
+			"args": "Help",
+		}).Debug(event)
 		return
 	}
 	if isVersion {
@@ -49,7 +53,7 @@ func main() {
 		typ, event = "argparse", "Check version"
 		log.WithFields(log.Fields{
 			"type": typ,
-			"key":  nil,
+			"args": "Version",
 		}).Info(event)
 		return
 	}
@@ -58,6 +62,45 @@ func main() {
 	log.WithFields(log.Fields{
 		"type": typ,
 		"arg":  arg,
-	}).Trace(event)
-	//TODO:Log module
+	}).Debug(event)
+
+	//Open File
+	//Check if it is .go file
+	var fileDiv = strings.Split(filename, ".")
+	if fileDiv == nil || fileDiv[cap(fileDiv)-1] != "go" {
+		typ, event = "Error", "Invalid suffix"
+		log.WithFields(log.Fields{
+			"type": typ,
+			"arg":  filename,
+		}).Fatal(event)
+	}
+
+	filePointer, errMsg := os.Open(filename)
+	if errMsg != nil {
+		typ, event = "Error", "Invalid path"
+		log.WithFields(log.Fields{
+			"type": typ,
+			"arg":  filename,
+		}).Fatal(event)
+	}
+	defer filePointer.Close()
+	contentByte, errMsg := ioutil.ReadAll(filePointer) //NOTE: 这里要在正式版本中改成按行读取节省内存
+	if errMsg != nil {
+		typ, event = "Error", "Unable to read file"
+		log.WithFields(log.Fields{
+			"type": typ,
+			"arg":  filename,
+		}).Fatal(event)
+	}
+	typ, event = "Work", "Read file"
+	log.WithFields(log.Fields{
+		"type": typ,
+		"arg":  filename,
+	}).Debug(event)
+	//fmt.Println(string(content))
+	var contentString = string(contentByte)
+
+	//Start analysis
+	var result = DoAnalysis(filename, contentString)
+	fmt.Println(result) //TODO:完成分析后修改结果处理
 }
