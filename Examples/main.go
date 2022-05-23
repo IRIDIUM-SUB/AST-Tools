@@ -20,7 +20,7 @@ func init() {
 	//Bind vars and args
 	flag.BoolVar(&isHelp, "h", false, "Show help info")
 	flag.BoolVar(&isVersion, "v", false, "Show Version")
-	flag.StringVar(&filename, "f", "./main.go", "Entry path")
+	flag.StringVar(&filename, "f", "./sample.src", "Entry path")
 }
 func showVersion() {
 	//Print version info
@@ -81,5 +81,5 @@ func main() {
 		}).Fatal(event)
 	}
 	fmt.Println(result)
-	//TODO:完成分析后修改结果处理
+
 }
