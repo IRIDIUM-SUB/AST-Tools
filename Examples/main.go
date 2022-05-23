@@ -4,15 +4,12 @@ import (
 	"flag"
 	"fmt"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
-	"os"
-	"strings"
 	//"path/filepath"
 	//"os"
 )
 
 var version = "v0.0.0"
-
+var typ, event, arg string
 var (
 	isHelp    bool   //helper info
 	isVersion bool   //version(seems useless)
@@ -37,7 +34,7 @@ func main() {
 	//log.SetFormatter(new(log.JSONFormatter))    // 日志格式设置成json
 
 	flag.Parse()
-	var typ, event, arg string
+
 	if isHelp {
 		flag.Usage()
 		typ, event = "argparse", "Check help"
@@ -64,43 +61,25 @@ func main() {
 		"arg":  arg,
 	}).Debug(event)
 
-	//Open File
-	//Check if it is .go file
-	var fileDiv = strings.Split(filename, ".")
+	//Check if it is .go file: Not used in test mode
+	/*var fileDiv = strings.Split(filename, ".")
 	if fileDiv == nil || fileDiv[cap(fileDiv)-1] != "go" {
 		typ, event = "Error", "Invalid suffix"
 		log.WithFields(log.Fields{
 			"type": typ,
 			"arg":  filename,
 		}).Fatal(event)
-	}
-
-	filePointer, errMsg := os.Open(filename)
-	if errMsg != nil {
-		typ, event = "Error", "Invalid path"
-		log.WithFields(log.Fields{
-			"type": typ,
-			"arg":  filename,
-		}).Fatal(event)
-	}
-	defer filePointer.Close()
-	contentByte, errMsg := ioutil.ReadAll(filePointer) //NOTE: 这里要在正式版本中改成按行读取节省内存
-	if errMsg != nil {
-		typ, event = "Error", "Unable to read file"
-		log.WithFields(log.Fields{
-			"type": typ,
-			"arg":  filename,
-		}).Fatal(event)
-	}
-	typ, event = "Work", "Read file"
-	log.WithFields(log.Fields{
-		"type": typ,
-		"arg":  filename,
-	}).Debug(event)
-	//fmt.Println(string(content))
-	var contentString = string(contentByte)
+	}*/
 
 	//Start analysis
-	var result = DoAnalysis(filename, contentString)
-	fmt.Println(result) //TODO:完成分析后修改结果处理
+	result, err := DoAnalysis(filename)
+	if err != nil {
+		typ, event, arg = "ASTError", "Unknown error", filename
+		log.WithFields(log.Fields{
+			"type": typ,
+			"arg":  arg,
+		}).Fatal(event)
+	}
+	fmt.Println(result)
+	//TODO:完成分析后修改结果处理
 }
